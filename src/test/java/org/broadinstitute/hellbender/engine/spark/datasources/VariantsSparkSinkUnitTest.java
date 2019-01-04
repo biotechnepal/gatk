@@ -6,7 +6,7 @@ import htsjdk.samtools.SAMSequenceRecord;
 import htsjdk.samtools.SamStreams;
 import htsjdk.samtools.seekablestream.SeekablePathStream;
 import htsjdk.samtools.seekablestream.SeekableStream;
-import htsjdk.samtools.util.BlockCompressedInputStream;
+import htsjdk.samtools.util.IOUtil;
 import htsjdk.variant.utils.VCFHeaderReader;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.GenotypeBuilder;
@@ -215,7 +215,7 @@ public final class VariantsSparkSinkUnitTest extends GATKBaseTest {
 
     private void checkFileExtensionConsistentWithContents(String outputPath) throws IOException {
         final String outputFile = IOUtils.makeFilePathAbsolute(outputPath);
-        boolean blockCompressed = isBlockCompressed(outputFile);
+        boolean blockCompressed = IOUtil.isBlockCompressed(IOUtils.getPath(outputFile));
         String vcfFormat = getVcfFormat(outputFile);
         if (outputFile.endsWith(".vcf")) {
             Assert.assertEquals("VCF", vcfFormat);
@@ -233,7 +233,7 @@ public final class VariantsSparkSinkUnitTest extends GATKBaseTest {
     }
 
     private static String getVcfFormat(String outputFile) throws IOException {
-        try (InputStream in = openFile(outputFile)) {
+        try (InputStream in = Files.newInputStream(IOUtils.getPath(outputFile))) {
             BufferedInputStream bis = new BufferedInputStream(in); // so mark/reset is supported
             return inferFromUncompressedData(SamStreams.isGzippedSAMFile(bis) ? new GZIPInputStream(bis) : bis);
         }
@@ -249,13 +249,4 @@ public final class VariantsSparkSinkUnitTest extends GATKBaseTest {
         return null;
     }
 
-    private static boolean isBlockCompressed(String outputFile) throws IOException {
-        try (InputStream in = new BufferedInputStream(openFile(outputFile))) {
-            return BlockCompressedInputStream.isValidFile(in);
-        }
-    }
-
-    private static InputStream openFile(String path) throws IOException {
-        return Files.newInputStream(IOUtils.getPath(path));
-    }
 }
