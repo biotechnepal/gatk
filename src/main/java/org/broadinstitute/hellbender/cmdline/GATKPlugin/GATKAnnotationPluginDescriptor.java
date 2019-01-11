@@ -43,7 +43,7 @@ public class GATKAnnotationPluginDescriptor  extends CommandLinePluginDescriptor
         // Get our configuration:
         final GATKConfig config = ConfigFactory.getInstance().getGATKConfig();
         // Exclude abstract classes and interfaces from the list of discovered codec classes
-        PLUGIN_PACKAGE_NAMES = Collections.unmodifiableList(config.codec_packages());
+        PLUGIN_PACKAGE_NAMES = Collections.unmodifiableList(config.annotation_packages());
     }
 
     private static final Class<?> pluginBaseClass = org.broadinstitute.hellbender.tools.walkers.annotator.Annotation.class;
